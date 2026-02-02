@@ -3,7 +3,7 @@ class Position:
         self.x = x
         self.y = y
 
-    def __eq__(self, other: Position) -> bool:
+    def __eq__(self, other: "Position") -> bool:
         return self.x == other.x and self.y == other.y
 
     def __hash__(self) -> int:
