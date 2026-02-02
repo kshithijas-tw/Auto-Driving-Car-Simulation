@@ -1,50 +1,76 @@
-from typing import Any
-
 from domain.field import Field
 from domain.car import Car
 from domain.position import Position
 from domain.direction import Direction
+from domain.events import MoveProposal, Collision
+from simulation.collision import CollisionDetector, SameTileCollisionDetector
 
 
 class Simulation:
-    def __init__(self, field: Field, cars: list[Car]):
+    def __init__(
+        self,
+        field: Field,
+        cars: list[Car],
+        collision_detector: CollisionDetector | None = None,
+    ):
         self.field = field
         self.cars = cars
         self.step = 0
-        self.collisions: list[dict[str, Any]] = []
-        
+        self.collision_detector: CollisionDetector = (
+            collision_detector or SameTileCollisionDetector()
+        )
+        self.collisions: list[dict] = []
 
-    def _has_collisions(self, proposals: dict[Position, list[tuple[Car, Direction]]]) -> bool:
-        collided_positions = {
-            pos: cars for pos, cars in proposals.items() if len(cars) > 1
-        }
-        if collided_positions:
-            for pos, cars in collided_positions.items():
-                self.collisions.append({
-                    "position": pos,
-                    "step": self.step,
-                    "cars": [c.name for c, _ in cars]
-                })
-                return True
-        return False
+    def _collect_move_proposals(self) -> dict[Position, list[MoveProposal]]:
+        proposals_by_position: dict[Position, list[MoveProposal]] = {}
 
-    def run(self) -> dict[str, Any]:
+        for car in self.cars:
+            if not car.has_commands_left():
+                continue
+
+            from_pos = car.position
+            from_dir = car.direction
+            to_pos, to_dir = car.peek_next_state(self.field)
+
+            proposal = MoveProposal(
+                car=car,
+                from_position=from_pos,
+                to_position=to_pos,
+                from_direction=from_dir,
+                to_direction=to_dir,
+            )
+            proposals_by_position.setdefault(to_pos, []).append(proposal)
+
+        return proposals_by_position
+
+    def _record_collisions(self, collisions: list[Collision]) -> None:
+        for collision in collisions:
+            self.collisions.append(
+                {
+                    "position": collision.position,
+                    "step": collision.step,
+                    "cars": [car.name for car in collision.cars],
+                }
+            )
+
+    def run(self) -> dict:
         while True:
             self.step += 1
-            proposals = {}
 
-            for car in self.cars:
-                if car.has_commands_left():
-                    pos, dir_ = car.peek_next_state(self.field)
-                    proposals.setdefault(pos, []).append((car, dir_))
+            proposals_by_position = self._collect_move_proposals()
 
-            if self._has_collisions(proposals):
+            collisions = self.collision_detector.detect(self.step, proposals_by_position)
+            if collisions:
+                self._record_collisions(collisions)
                 break
 
             moved = False
-            for pos, cars in proposals.items():
-                for car, dir_ in cars:
-                    car.commit(pos, dir_)
+            for proposals in proposals_by_position.values():
+                for proposal in proposals:
+                    proposal.car.commit(
+                        proposal.to_position,
+                        proposal.to_direction,
+                    )
                     moved = True
 
             if not moved:
