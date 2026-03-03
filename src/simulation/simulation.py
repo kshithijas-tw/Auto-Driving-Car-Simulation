@@ -1,12 +1,10 @@
 from domain.field import Field
 from domain.car import Car
-from domain.position import Position
-from domain.direction import Direction
-from domain.events import MoveProposal, Collision
+from domain.events import MoveProposal
 from simulation.collision import CollisionDetector
 
 
-class Simulation:
+class SimulationBase:
     def __init__(
         self,
         field: Field,
@@ -41,7 +39,11 @@ class Simulation:
 
         return paths
 
+    def run(self) -> dict:
+        raise NotImplementedError
 
+
+class StepByStepSimulation(SimulationBase):
     def run(self) -> dict:
         while True:
             self.step += 1
@@ -68,4 +70,3 @@ class Simulation:
                 break
 
         return {"collisions": collisions}
-

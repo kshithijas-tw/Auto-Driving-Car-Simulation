@@ -2,7 +2,7 @@ from domain.position import Position
 from domain.direction import Direction
 from domain.field import Field
 from domain.car import Car
-from simulation.simulation import Simulation
+from simulation.simulation import StepByStepSimulation
 
 
 def test_single_car_simulation():
@@ -14,7 +14,7 @@ def test_single_car_simulation():
         commands="FFRFFFFRRL",
     )
 
-    simulation = Simulation(field, [car])
+    simulation = StepByStepSimulation(field, [car])
     simulation.run()
 
     assert car.position == Position(5, 4)
@@ -37,7 +37,7 @@ def test_two_cars_move_step_by_step_without_collision():
         commands="F",
     )
 
-    simulation = Simulation(field, [car_a, car_b])
+    simulation = StepByStepSimulation(field, [car_a, car_b])
     simulation.run()
 
     assert car_a.position == Position(0, 2)
@@ -60,7 +60,7 @@ def test_two_cars_collide():
         commands="FFLFFFFFFF",
     )
 
-    simulation = Simulation(field, [car_a, car_b])
+    simulation = StepByStepSimulation(field, [car_a, car_b])
     result = simulation.run()
 
     assert result["collisions"][0].position == Position(5, 4)

@@ -2,7 +2,7 @@ from domain.field import Field
 from domain.car import Car
 from domain.position import Position
 from domain.direction import Direction
-from simulation.simulation import Simulation
+from simulation.simulation import StepByStepSimulation
 
 
 def read_field():
@@ -52,7 +52,7 @@ def print_cars(cars):
 def run_simulation(field, cars):
     print_cars(cars)
 
-    simulation = Simulation(field, cars)
+    simulation = StepByStepSimulation(field, cars)
     result = simulation.run()
     collisions = result["collisions"]
 

@@ -4,7 +4,7 @@ from domain.field import Field
 from domain.car import Car
 from domain.events import MoveProposal, Collision
 from simulation.collision import CollisionDetector
-from simulation.simulation import Simulation
+from simulation.simulation import StepByStepSimulation
 
 
 def _make_car(name: str, x: int, y: int, direction: Direction, commands: str) -> Car:
@@ -68,7 +68,8 @@ def test_custom_collision_detector_can_be_injected_into_simulation():
     field = Field(5, 5)
     car = _make_car("A", 1, 1, Direction.N, "FF")
 
-    simulation = Simulation(field, [car], collision_detector=AlwaysCollideDetector())
+    simulation = StepByStepSimulation(
+        field, [car], collision_detector=AlwaysCollideDetector())
     result = simulation.run()
 
     assert result["collisions"][0].position == Position(0, 0)
@@ -164,4 +165,3 @@ def test_collision_detector_detects_swap_cycle_as_collision():
     cycle_collision = cycle_collisions[0]
     assert cycle_collision.position in {pos_a, pos_b}
     assert {car.name for car in cycle_collision.cars} == {"A", "B"}
-
