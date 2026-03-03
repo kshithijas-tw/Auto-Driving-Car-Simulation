@@ -9,12 +9,19 @@ class Car:
         self.position = position
         self.direction = direction
         self.commands = list(commands)
+        self.is_collided = False
+
+    def has_collided(self) -> bool:
+        return self.is_collided
+
+    def set_collided(self) -> None:
+        self.is_collided = True
 
     def has_commands_left(self) -> bool:
         return len(self.commands) > 0
 
     def peek_next_state(self, field: Field) -> tuple[Position, Direction]:
-        if not self.has_commands_left():
+        if not self.has_commands_left() or self.is_collided:
             return self.position, self.direction
 
         command = self.commands[0]

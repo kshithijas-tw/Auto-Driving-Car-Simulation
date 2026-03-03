@@ -57,16 +57,13 @@ def run_simulation(field, cars):
     collisions = result["collisions"]
 
     print("After simulation, the result is:")
-    if not collisions:
-        for car in cars:
+    for car in cars:
+        collision = next((collision for collision in collisions if car in collision.cars), None)
+        if car.has_collided() and collision:
+            others = ", ".join([c.name for c in collision.cars if c.name != car.name])
+            print(f"- {car.name}, collides with {others} at "
+                    f"({collision.position.x},{collision.position.y}) at step {collision.step}")
+        else:
             print(f"- {car.name}, ({car.position.x},{car.position.y}) {car.direction.name}")
-    else:
-        for collision in collisions:
-            cars = collision["cars"]
-            pos, step = collision["position"], collision["step"]
-            for i, car_name in enumerate(cars):
-                others = ", ".join(cars[:i] + cars[i + 1 :])
-                print(f"- {car_name}, collides with {others} at "
-                    f"({pos.x},{pos.y}) at step {step}")
     print("\n")
 
