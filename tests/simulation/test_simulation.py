@@ -63,5 +63,5 @@ def test_two_cars_collide():
     simulation = Simulation(field, [car_a, car_b])
     result = simulation.run()
 
-    assert result["collisions"][0]["position"] == Position(5, 4)
-    assert result["collisions"][0]["step"] == 7
+    assert result["collisions"][0].position == Position(5, 4)
+    assert result["collisions"][0].step == 7

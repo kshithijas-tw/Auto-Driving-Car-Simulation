@@ -1,5 +1,5 @@
 import pytest
-from cli.run import read_car, print_cars, run_simulation
+from cli.run import read_car, read_field, print_cars, run_simulation
 from domain.car import Car
 from domain.position import Position
 from domain.direction import Direction
@@ -39,6 +39,19 @@ def test_read_car_invalid_direction(monkeypatch):
 
     with pytest.raises(ValueError):
         read_car(existing_names=set())
+
+
+def test_read_field_retries_on_invalid_input(monkeypatch):
+    inputs = iter([
+        "10",      # invalid: single number
+        "10 10",   # valid
+    ])
+    monkeypatch.setattr("builtins.input", lambda _: next(inputs))
+
+    field = read_field()
+
+    assert field.width == 10
+    assert field.height == 10
 
 def test_print_cars(capsys):
     cars = [
