@@ -1,4 +1,5 @@
 from cli.run import read_field, read_car, print_cars, run_simulation
+from direct.showbase.ShowBase import ShowBase
 
 def main():
     field = read_field()
@@ -38,6 +39,13 @@ def main():
         else:
             print("Invalid choice.\n")
 
+class MyApp(ShowBase):
+
+    def __init__(self):
+        ShowBase.__init__(self)
+
+
 
 if __name__ == "__main__":
-    main()
+    app = MyApp()
+    app.run()
